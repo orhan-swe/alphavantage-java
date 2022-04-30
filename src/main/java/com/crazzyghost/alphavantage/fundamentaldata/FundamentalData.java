@@ -45,12 +45,12 @@ import java.util.Map;
  * @author Sylvester Sefa-Yeboah
  * @since 1.6.0
  */
-public final class FundamentalData implements Fetcher {
+public class FundamentalData implements Fetcher {
 
-    private final Config config;
-    private FundamentalDataRequest.Builder<?> builder;
-    private Fetcher.SuccessCallback<?> successCallback;
-    private Fetcher.FailureCallback failureCallback;
+    protected final Config config;
+    protected FundamentalDataRequest.Builder<?> builder;
+    protected Fetcher.SuccessCallback<?> successCallback;
+    protected Fetcher.FailureCallback failureCallback;
 
     public FundamentalData(Config config) { this.config = config; }
 
@@ -61,6 +61,10 @@ public final class FundamentalData implements Fetcher {
 
     public BalanceSheetRequestProxy balanceSheet() {
         return new BalanceSheetRequestProxy();
+    }
+
+    public ListingRequestProxy listingCSVFile() {
+        return new ListingRequestProxy();
     }
 
     public CashFlowRequestProxy cashFlow() {
@@ -108,7 +112,7 @@ public final class FundamentalData implements Fetcher {
      * @param successCallback internally used {@link SuccessCallback}
      * @throws AlphaVantageException exception thrown
      */
-    private void fetchSync(SuccessCallback<?> successCallback) throws AlphaVantageException {
+    protected void fetchSync(SuccessCallback<?> successCallback) throws AlphaVantageException {
 
         Config.checkNotNullOrKeyEmpty(config);
 
@@ -122,7 +126,7 @@ public final class FundamentalData implements Fetcher {
         }
     }
 
-    private void parseFundamentalDataResponse(Map<String, Object> data) {
+    protected void parseFundamentalDataResponse(Map<String, Object> data) {
         switch (builder.function) {
             case OVERVIEW:
                 parseCompanyOverviewResponse(data);
@@ -145,7 +149,7 @@ public final class FundamentalData implements Fetcher {
     }
 
     @SuppressWarnings("unchecked")
-    private void parseCompanyOverviewResponse(Map<String, Object> data/*Object data*/) {
+    protected void parseCompanyOverviewResponse(Map<String, Object> data/*Object data*/) {
         CompanyOverviewResponse response = CompanyOverviewResponse.of(data);
         if(response.getErrorMessage() != null && failureCallback != null) {
             failureCallback.onFailure(new AlphaVantageException(response.getErrorMessage()));
@@ -156,7 +160,7 @@ public final class FundamentalData implements Fetcher {
     }
 
     @SuppressWarnings("unchecked")
-    private void parseBalanceSheetResponse(Map<String, Object> data) {
+    protected void parseBalanceSheetResponse(Map<String, Object> data) {
         BalanceSheetResponse response = BalanceSheetResponse.of(data);
         if(response.getErrorMessage() != null && failureCallback != null) {
             failureCallback.onFailure(new AlphaVantageException(response.getErrorMessage()));
@@ -167,7 +171,7 @@ public final class FundamentalData implements Fetcher {
     }
 
     @SuppressWarnings("unchecked")
-    private void parseIncomeStatementResponse(Map<String, Object> data) {
+    protected void parseIncomeStatementResponse(Map<String, Object> data) {
         IncomeStatementResponse response = IncomeStatementResponse.of(data);
         if(response.getErrorMessage() != null && failureCallback != null) {
             failureCallback.onFailure(new AlphaVantageException(response.getErrorMessage()));
@@ -178,7 +182,7 @@ public final class FundamentalData implements Fetcher {
     }
 
     @SuppressWarnings("unchecked")
-    private void parseCashFlowResponse(Map<String, Object> data) {
+    protected void parseCashFlowResponse(Map<String, Object> data) {
         CashFlowResponse response = CashFlowResponse.of(data);
         if(response.getErrorMessage() != null && failureCallback != null) {
             failureCallback.onFailure(new AlphaVantageException(response.getErrorMessage()));
@@ -189,7 +193,7 @@ public final class FundamentalData implements Fetcher {
     }
 
     @SuppressWarnings("unchecked")
-    private void parseEarningsResponse(Map<String, Object> data) {
+    protected void parseEarningsResponse(Map<String, Object> data) {
         EarningsResponse response = EarningsResponse.of(data);
         if(response.getErrorMessage() != null && failureCallback != null) {
             failureCallback.onFailure(new AlphaVantageException(response.getErrorMessage()));
@@ -258,6 +262,13 @@ public final class FundamentalData implements Fetcher {
     public class BalanceSheetRequestProxy extends RequestProxy<BalanceSheetRequestProxy, BalanceSheetResponse> {
         public BalanceSheetRequestProxy() {
             builder = new BalanceSheetRequest.Builder();
+        }
+    }
+
+    /** Proxy class for building an BalanceSheet **/
+    public class ListingRequestProxy extends RequestProxy<ListingRequestProxy, ListingDelistingStatusResponse> {
+        public ListingRequestProxy() {
+            builder = new ListingDelistingStatusRequest.Builder();
         }
     }
 
